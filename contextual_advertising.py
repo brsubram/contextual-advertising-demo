@@ -6,8 +6,8 @@ from nltk.corpus import stopwords
 import string
 
 # Download nltk data
-nltk.download('punkt')
-nltk.download('stopwords')
+nltk.download('punkt', quiet=True)
+nltk.download('stopwords', quiet=True)
 
 
 def download_html(url):
@@ -31,11 +31,12 @@ def clean_html(html):
 
 def extract_keywords(text):
     stop_words = set(stopwords.words('english') + list(string.punctuation))
+    stop_words = [word for word in stop_words if isinstance(word, str)]
     vectorizer = TfidfVectorizer(stop_words=stop_words, ngram_range=(1, 2))
     X = vectorizer.fit_transform([text])
     scores = zip(vectorizer.get_feature_names_out(), X.toarray()[0])
     sorted_scores = sorted(scores, key=lambda x: x[1], reverse=True)
-    return sorted_scores
+    return sorted_scores[:20]  # Return only the top 20 keywords
 
 
 def main(url):
@@ -49,4 +50,7 @@ def main(url):
 
 if __name__ == "__main__":
     url = input("Enter the URL: ")
-    main(url)
+    if url:
+        main(url)
+    else:
+        print("No URL provided. Please enter a valid URL.")
